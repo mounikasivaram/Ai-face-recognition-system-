@@ -86,7 +86,10 @@ async function startCamera(videoId, placeholderId, captureButtonId, messageId) {
   stopCamera();
 
   if (!navigator.mediaDevices?.getUserMedia) {
-    showMessage(messageId, "Camera is unavailable. Open this page at localhost.", "error");
+    const message = window.isSecureContext
+      ? "This browser cannot access the camera. Check camera permissions or try another browser."
+      : "Phone camera access needs the app's HTTPS website link. A local Wi-Fi address starting with http:// cannot open the camera. Use photo upload where available.";
+    showMessage(messageId, message, "error");
     return;
   }
 
