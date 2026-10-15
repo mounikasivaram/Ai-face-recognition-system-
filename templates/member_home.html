@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My attendance · Face Recognition</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v=mobile-20261014">
+  <script src="{{ url_for('static', filename='member.js') }}" defer></script>
+</head>
+<body class="member-page" data-member-name="{{ participant_name }}">
+  <div class="member-shell">
+    <header class="member-header">
+      <div>
+        <p class="login-brand-name">Face Recognition Attendance</p>
+        <span class="member-account">Signed in as {{ current_username }}</span>
+      </div>
+      <form action="{{ url_for('logout') }}" method="post"><button class="secondary-button" type="submit">Log out</button></form>
+    </header>
+    <main>
+      <section class="member-welcome">
+        <p class="eyebrow">MY ATTENDANCE</p>
+        <h1>Hello, {{ participant_name }}</h1>
+        <p>{{ participant_category }} · ID {{ session.get('institution_id', '') }}</p>
+      </section>
+      <section class="work-card member-status-card" aria-live="polite">
+        <p class="eyebrow">TODAY · <span id="memberAttendanceDate">Loading…</span></p>
+        <h2 id="memberAttendanceStatus">Checking attendance…</h2>
+        <p id="memberAttendanceNotice" class="section-description">Your attendance update will appear here.</p>
+        <button class="secondary-button" id="refreshMemberAttendance" type="button">Refresh status</button>
+      </section>
+      <section class="work-card history-card">
+        <div class="history-toolbar"><h2>Visitor requests for me</h2><button class="secondary-button" id="refreshHostVisitorPasses" type="button">Refresh</button></div>
+        <p class="helper-text">Approve or reject visitor requests assigned to your account.</p>
+        <div class="table-wrap">
+          <table><thead><tr><th>Visitor</th><th>Purpose</th><th>Visit window</th><th>Status</th><th>Pass code</th><th>Action</th></tr></thead>
+          <tbody id="hostVisitorPassRows"><tr><td colspan="6">Loading visitor requests…</td></tr></tbody></table>
+        </div>
+      </section>
+      <section class="work-card history-card">
+        <h2>My attendance history</h2>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Date and time</th><th>Event</th></tr></thead>
+            <tbody id="memberAttendanceRows"><tr><td colspan="2">Loading attendance…</td></tr></tbody>
+          </table>
+        </div>
+      </section>
+      <p id="memberPageMessage" class="message" aria-live="polite"></p>
+    </main>
+    <footer class="member-footer">Your account shows only the attendance linked to your enrolled profile.</footer>
+  </div>
+</body>
+</html>

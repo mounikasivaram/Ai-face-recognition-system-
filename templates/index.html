@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Face Recognition</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v=mobile-20261014">
+  <script src="{{ url_for('static', filename='app.js') }}" defer></script>
+</head>
+<body data-current-role="{{ current_role }}" data-current-username="{{ current_username }}">
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-icon">AI</div>
+        <div>
+          <strong>Face ID</strong>
+          <span>Recognition Studio</span>
+        </div>
+      </div>
+
+      <p class="nav-heading">WORKSPACE</p>
+      <nav class="navigation">
+        <button class="nav-button active" data-page="overview">◫ <span>Home</span></button>
+        <button class="nav-button" data-page="enroll" data-admin-only>＋ <span>Enroll person</span></button>
+        <button class="nav-button" data-page="train" data-admin-only>⚙ <span>Train model</span></button>
+        <button class="nav-button" data-page="recognize">◎ <span>Recognize</span></button>
+        <button class="nav-button" data-page="access">◈ <span>Access control</span></button>
+        <button class="nav-button" data-page="visitor-passes">▣ <span>Visitor passes</span></button>
+        <button class="nav-button" data-page="attendance">▣ <span>Attendance</span></button>
+        <button class="nav-button" data-page="history">▤ <span>History &amp; evaluation</span></button>
+        <button class="nav-button" data-page="users" data-admin-only>♙ <span>User accounts</span></button>
+      </nav>
+
+    </aside>
+
+    <main class="main-content">
+      <header class="topbar">
+        <div>
+          <h1>AI Face Recognition</h1>
+        </div>
+        <div class="account-controls">
+          <span class="system-pill"><span class="status-dot"></span> {{ current_username }} · {{ current_role|title }}</span>
+          <form action="{{ url_for('logout') }}" method="post">
+            <button class="secondary-button" type="submit">Log out</button>
+          </form>
+        </div>
+      </header>
+
+      <section id="overview" class="page active">
+        <div class="welcome-card">
+          <div>
+            <p class="eyebrow light">PROJECT DASHBOARD</p>
+            <h2>Face recognition, made simple.</h2>
+            <p>Enroll participants, train your model, and review recognition results.</p>
+            <button class="primary-button" data-open-page="enroll" data-admin-only>Get started →</button>
+          </div>
+          <div class="welcome-art" aria-hidden="true">
+            <div class="face-ring"><div class="face-shape">●<br>⌣</div></div>
+          </div>
+        </div>
+
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">AT A GLANCE</p>
+            <h2>System Dashboard</h2>
+          </div>
+          <button class="text-button" id="refreshStatus">Refresh status ↻</button>
+        </div>
+
+        <div class="metric-grid">
+          <article class="metric-card">
+            <span class="metric-icon purple">♙</span>
+            <p>Participants</p>
+            <strong id="participantsCount">0</strong>
+            <small>Enrolled in this demo</small>
+          </article>
+          <article class="metric-card">
+            <span class="metric-icon blue">▧</span>
+            <p>Face images</p>
+            <strong id="imageCount">0</strong>
+            <small id="qualitySummary">Dataset image total</small>
+          </article>
+          <article class="metric-card">
+            <span class="metric-icon green">✓</span>
+            <p>Recognition model</p>
+            <strong id="modelStatus">Not trained</strong>
+            <small id="modelHelp">Train after enrolling two people</small>
+          </article>
+          <article class="metric-card">
+            <span class="metric-icon purple">%</span>
+            <p>Evaluation accuracy</p>
+            <strong id="evaluationAccuracy">Not tested</strong>
+            <small id="evaluationCount">Save evaluations to calculate</small>
+          </article>
+        </div>
+
+        <div class="section-heading compact-heading">
+          <div>
+            <p class="eyebrow">TODAY</p>
+            <h2>Attendance status</h2>
+            <p class="section-description">See who has checked in today and the time of their latest attendance event.</p>
+          </div>
+          <button class="text-button" id="refreshHomeAttendance">Refresh attendance ↻</button>
+        </div>
+        <div class="work-card history-card">
+          <p id="homeAttendanceDate" class="helper-text"></p>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Person</th><th>Category</th><th>Status</th><th>Latest event</th><th>Date and time</th></tr></thead>
+              <tbody id="homeAttendanceBody"><tr><td colspan="5">Loading today’s attendance…</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="section-heading compact-heading">
+          <div>
+            <p class="eyebrow">YOUR DATASET</p>
+            <h2>Participants</h2>
+          </div>
+        </div>
+        <div id="participantList" class="participant-list">
+          <p class="empty-state">No participants enrolled yet. Use “Enroll person” to begin.</p>
+        </div>
+
+        <section id="participantGallerySection" class="gallery-section" hidden>
+          <div class="section-heading compact-heading">
+            <div>
+              <p class="eyebrow">SAVED DATA</p>
+              <h2 id="galleryTitle">Participant image preview</h2>
+            </div>
+            <button class="text-button" id="closeGallery">Close preview</button>
+          </div>
+          <div id="participantGallery" class="image-gallery"></div>
+        </section>
+      </section>
+
+      <section id="enroll" class="page">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">DATASET</p>
+            <h2>Enroll a person</h2>
+            <p class="section-description">Use face images only with the participant’s permission.</p>
+          </div>
+        </div>
+
+        <div class="work-card">
+          <label for="participantCategory">Person type</label>
+          <select id="participantCategory">
+            <option>Student</option>
+            <option>Employee</option>
+            <option>Visitor</option>
+            <option>Security staff</option>
+          </select>
+          <label for="participantName">Participant name</label>
+          <input id="participantName" type="text" placeholder="Enter enrolled person's name" autocomplete="off">
+          <p class="helper-text">This name appears in the participant list, recognition results, and attendance records.</p>
+
+          <div class="camera-panel">
+            <video id="enrollVideo" autoplay playsinline muted></video>
+            <div class="camera-placeholder" id="enrollPlaceholder">
+              <div class="camera-symbol">◎</div>
+              <strong>Camera is off</strong>
+              <span>Start the camera to take an enrollment photo.</span>
+            </div>
+          </div>
+
+          <div class="button-row">
+            <button class="secondary-button" id="startEnrollCamera">Start camera</button>
+            <button class="secondary-button stop-camera-button" id="stopEnrollCamera" type="button">Stop camera</button>
+            <button class="primary-button" id="captureEnroll" disabled>Capture and save</button>
+          </div>
+          <p id="enrollMessage" class="message" aria-live="polite"></p>
+          <p class="helper-text">Capture at least 3 images per person to train; 4 varied images are recommended. Turn slightly between photos.</p>
+        </div>
+      </section>
+
+      <section id="train" class="page">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">MODEL</p>
+            <h2>Train recognition model</h2>
+            <p class="section-description">Review the dataset and train the LBPH model.</p>
+          </div>
+        </div>
+
+        <div class="work-card">
+          <h3>Dataset quality check</h3>
+          <p class="helper-text">Training requires at least 3 readable images per participant. Four varied images are recommended.</p>
+          <div id="qualityList" class="quality-list">
+            <p class="empty-state">Participant image counts will appear here.</p>
+          </div>
+          <div class="train-action">
+            <button class="primary-button" id="trainButton">Train model</button>
+            <p id="trainMessage" class="message" aria-live="polite"></p>
+          </div>
+        </div>
+      </section>
+
+      <section id="recognize" class="page">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">RECOGNITION</p>
+            <h2>Recognize a face</h2>
+            <p class="section-description">Use the camera or upload a photo.</p>
+          </div>
+        </div>
+
+        <div class="work-card">
+          <div class="threshold-row">
+            <label for="threshold">Match threshold <strong id="thresholdValue">70</strong></label>
+            <input id="threshold" type="range" min="30" max="120" value="70">
+            <small>Lower values are stricter.</small>
+          </div>
+
+          <div class="camera-panel">
+            <video id="recognizeVideo" autoplay playsinline muted></video>
+            <div class="camera-placeholder" id="recognizePlaceholder">
+              <div class="camera-symbol">◎</div>
+              <strong>Camera is off</strong>
+              <span>Start the camera or choose a photo below.</span>
+            </div>
+          </div>
+
+          <div class="button-row">
+            <button class="secondary-button" id="startRecognizeCamera">Start camera</button>
+            <button class="secondary-button stop-camera-button" id="stopRecognizeCamera" type="button">Stop camera</button>
+            <button class="primary-button" id="captureRecognize" disabled>Capture and recognize</button>
+          </div>
+
+          <div class="upload-row">
+            <label for="recognizeUpload">Or upload a photo</label>
+            <input id="recognizeUpload" type="file" accept="image/*">
+            <button class="secondary-button" id="recognizeUploadButton">Recognize uploaded photo</button>
+          </div>
+
+          <div id="recognizeResults" class="result-area"></div>
+          <p id="recognizeMessage" class="message" aria-live="polite"></p>
+
+          <div id="evaluationPanel" class="evaluation-panel" hidden>
+            <h3>Evaluate this result</h3>
+            <p class="helper-text">Choose who is actually in the photo to record whether the match was correct.</p>
+            <label for="expectedName">Actual participant</label>
+            <select id="expectedName"></select>
+            <button class="primary-button" id="saveEvaluation">Save evaluation</button>
+            <p id="evaluationMessage" class="message" aria-live="polite"></p>
+          </div>
+        </div>
+      </section>
+
+      <section id="history" class="page">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">PROJECT RESULTS</p>
+            <h2>History and evaluation</h2>
+            <p class="section-description">Review recognition attempts and manually evaluated matches.</p>
+          </div>
+          <a class="text-button download-link" href="/api/history.csv">Download CSV</a>
+        </div>
+
+        <div class="work-card history-card">
+          <div class="history-toolbar">
+            <h3>Recent records</h3>
+            <button class="secondary-button" id="refreshHistory">Refresh history</button>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Time</th>
+                  <th>Record type</th>
+                  <th>Predicted</th>
+                  <th>Actual</th>
+                  <th>Distance</th>
+                  <th>Correct</th>
+                  <th data-admin-only>Action</th>
+                </tr>
+              </thead>
+              <tbody id="historyTableBody">
+                <tr><td colspan="7">No history yet.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <section id="attendance" class="page">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">ATTENDANCE</p>
+            <h2>Check-in and check-out log</h2>
+            <p class="section-description">Record attendance after recognizing an enrolled person.</p>
+          </div>
+          <a class="text-button download-link" href="/api/attendance.csv">Download attendance CSV</a>
+        </div>
+        <div class="work-card history-card">
+          <div class="history-toolbar attendance-filters">
+            <label for="attendanceDate">Date</label>
+            <input id="attendanceDate" type="date">
+            <label for="attendancePerson">Person</label>
+            <input id="attendancePerson" type="search" placeholder="Filter by person">
+            <button class="secondary-button" id="refreshAttendance">Refresh</button>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Time</th><th>Person</th><th>Event</th><th>Recorded by</th><th data-admin-only>Action</th></tr></thead>
+              <tbody id="attendanceTableBody"><tr><td colspan="5">No attendance records yet.</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+        <div class="work-card history-card monthly-report-card">
+          <div class="history-toolbar attendance-filters">
+            <div>
+              <h3>Monthly attendance report</h3>
+              <p class="helper-text">Summary of check-ins, check-outs, and days attended.</p>
+            </div>
+            <label for="attendanceMonth">Month</label>
+            <input id="attendanceMonth" type="month">
+            <button class="secondary-button" id="refreshMonthlyReport" type="button">Refresh report</button>
+            <a class="text-button download-link" id="downloadMonthlyReport" href="/api/attendance/monthly.csv">Download monthly CSV</a>
+          </div>
+          <div class="metric-grid monthly-metric-grid">
+            <article class="metric-card"><p>People attended</p><strong id="monthlyPeopleAttended">0</strong></article>
+            <article class="metric-card"><p>Total check-ins</p><strong id="monthlyCheckIns">0</strong></article>
+            <article class="metric-card"><p>Total check-outs</p><strong id="monthlyCheckOuts">0</strong></article>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Person</th><th>Category</th><th>Days attended</th><th>Check-ins</th><th>Check-outs</th><th>Latest event</th></tr></thead>
+              <tbody id="monthlyAttendanceBody"><tr><td colspan="6">Choose a month to load the report.</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <section id="access" class="page">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">ACCESS CONTROL DEMO</p>
+            <h2>Access permissions</h2>
+            <p class="section-description">Choose which enrolled people are approved in this software-only access simulation.</p>
+          </div>
+        </div>
+        <div class="work-card history-card">
+          <h3>Enrolled people</h3>
+          <p class="helper-text">New participants are denied by default. Admins can grant or revoke access for non-visitors. Visitors need an approved active pass.</p>
+          <div id="accessParticipantList" class="quality-list">
+            <p class="empty-state">Participant permissions will appear here.</p>
+          </div>
+        </div>
+        <div class="work-card history-card access-log-card">
+          <div class="history-toolbar">
+            <h3>Recent access attempts</h3>
+            <button class="secondary-button" id="refreshAccess">Refresh access log</button>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Time</th><th>Person</th><th>Decision</th><th>Reason</th><th>Distance</th><th>Operator</th></tr></thead>
+              <tbody id="accessLogTableBody"><tr><td colspan="6">No access attempts yet.</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <section id="visitor-passes" class="page">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">VISITOR ACCESS</p>
+            <h2>Visitor passes</h2>
+            <p class="section-description">Create a visit request and send it to the selected host for approval.</p>
+          </div>
+          <div class="button-row">
+            <button class="secondary-button" id="enrollVisitorShortcut" type="button" data-admin-only>Enroll a visitor</button>
+            <button class="secondary-button" id="refreshVisitorPasses" type="button">Refresh</button>
+          </div>
+        </div>
+        <div class="work-card">
+          <h3>Request a visitor pass</h3>
+          <div class="user-form-grid">
+            <label>Enrolled visitor<select id="visitorPassPerson"><option value="">Choose a visitor</option></select></label>
+            <label>Host<select id="visitorPassHost"><option value="">Choose a host account</option></select></label>
+            <label>Visit purpose<input id="visitorPassPurpose" type="text" maxlength="160" placeholder="Meeting, interview, delivery…"></label>
+            <label>Visit starts<input id="visitorPassStarts" type="datetime-local"></label>
+            <label>Visit ends<input id="visitorPassEnds" type="datetime-local"></label>
+          </div>
+          <button class="primary-button" id="createVisitorPass" type="button">Send for host approval</button>
+          <p id="visitorPassMessage" class="message" aria-live="polite"></p>
+          <p class="helper-text">First enroll the person with type “Visitor” using the button above. Choose an approved member, Admin, or Operator as host. If the lists are empty, refresh this page after enrolling or creating the account.</p>
+        </div>
+        <div class="work-card history-card">
+          <h3>Visitor pass requests</h3>
+          <div class="table-wrap">
+            <table><thead><tr><th>Visitor</th><th>Host</th><th>Purpose</th><th>Visit window</th><th>Status</th><th>Pass code</th><th>Action</th></tr></thead>
+            <tbody id="visitorPassRows"><tr><td colspan="7">No visitor requests yet.</td></tr></tbody></table>
+          </div>
+        </div>
+      </section>
+
+      <section id="users" class="page" data-admin-only>
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">ADMINISTRATION</p>
+            <h2>User accounts</h2>
+            <p class="section-description">Manage operator accounts and approve student or employee attendance accounts.</p>
+          </div>
+        </div>
+        <div class="work-card">
+          <h3>Add a user</h3>
+          <div class="user-form-grid">
+            <label>Username<input id="newUsername" type="text" minlength="3" autocomplete="off"></label>
+            <label>Temporary password<input id="newUserPassword" type="password" minlength="8" autocomplete="new-password"></label>
+            <label>Role<select id="newUserRole"><option value="operator">Operator</option><option value="admin">Admin</option></select></label>
+          </div>
+          <button class="primary-button" id="createUserButton">Create account</button>
+          <p id="userMessage" class="message" aria-live="polite"></p>
+          <div id="userList" class="quality-list"></div>
+        </div>
+        <div class="work-card history-card">
+          <h3>Project data backup</h3>
+          <p class="helper-text">Download a private ZIP backup of enrolled face images, model files, attendance, and project metadata. Store it securely.</p>
+          <a class="primary-button auth-link-button" href="/api/backup.zip">Download backup</a>
+        </div>
+        <div class="work-card history-card">
+          <h3>Account Approval</h3>
+          <p class="helper-text">Verify the person’s school or employee ID, then approve the matching enrolled participant.</p>
+          <div id="signupRequestList" class="quality-list">
+            <p class="empty-state">No pending requests.</p>
+          </div>
+        </div>
+      </section>
+
+      <footer class="footer">
+        <span>AI Face Recognition · Classroom demonstration</span>
+        <span>Keep participant face data private.</span>
+      </footer>
+    </main>
+  </div>
+</body>
+</html>

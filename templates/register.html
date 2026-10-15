@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Create account · Face Recognition</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v=mobile-20261014">
+  <script src="{{ url_for('static', filename='auth.js') }}" defer></script>
+</head>
+<body class="auth-page login-page">
+  <main class="auth-card">
+    <p class="login-brand-name">AI Face Recognition System</p>
+    {% if submitted %}
+      <h1>Account request received</h1>
+      <p class="section-description">Your account is pending Admin approval. After the Admin verifies your ID and links your enrolled profile, sign in with the username and password you created.</p>
+      <a class="primary-button auth-link-button" href="{{ url_for('login') }}">Back to sign in</a>
+    {% else %}
+      <h1>Create account</h1>
+      <p class="section-description">For students and employees. Enter the same full name and category used on your enrolled face profile. The Admin verifies your ID and approves the account before you can view attendance.</p>
+      {% if error %}<p class="message error">{{ error }}</p>{% endif %}
+      <form method="post" action="{{ url_for('register') }}" class="auth-form">
+        <label>Full name<input name="display_name" type="text" minlength="2" maxlength="60" required autocomplete="name"></label>
+        <label>Person type<select name="category" required><option value="">Choose one</option><option>Student</option><option>Employee</option></select></label>
+        <label>Student or employee ID<input name="institution_id" type="text" maxlength="40" required autocomplete="off"></label>
+        <label>Username<input name="username" type="text" minlength="3" required autocomplete="username"></label>
+        <label for="registerPassword">Password</label>
+        <div class="password-input-wrap">
+          <input id="registerPassword" name="password" type="password" minlength="8" required autocomplete="new-password">
+          <button class="password-toggle" type="button" data-password-toggle="registerPassword" aria-label="Show password" title="Show password">👁️</button>
+        </div>
+        <label for="confirmPassword">Confirm password</label>
+        <div class="password-input-wrap">
+          <input id="confirmPassword" name="confirm_password" type="password" minlength="8" required autocomplete="new-password">
+          <button class="password-toggle" type="button" data-password-toggle="confirmPassword" aria-label="Show password" title="Show password">👁️</button>
+        </div>
+        <button class="primary-button" type="submit">Send account request</button>
+      </form>
+      <p class="auth-switch">Already have an account? <a href="{{ url_for('login') }}">Sign in</a></p>
+    {% endif %}
+  </main>
+</body>
+</html>

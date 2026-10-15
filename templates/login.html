@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sign in · AI Face Recognition</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v=mobile-20261014">
+  <script src="{{ url_for('static', filename='auth.js') }}" defer></script>
+</head>
+<body class="auth-page login-page">
+  <main class="auth-card">
+    <p class="login-brand-name">AI Face Recognition System</p>
+    <h1>Sign in</h1>
+    {% if error %}<p class="message error">{{ error }}</p>{% endif %}
+    <form method="post" action="{{ url_for('login') }}" class="auth-form">
+      <label>Username<input name="username" type="text" required autocomplete="username"></label>
+      <label for="loginPassword">Password</label>
+      <div class="password-input-wrap">
+        <input id="loginPassword" name="password" type="password" required autocomplete="current-password">
+        <button class="password-toggle" type="button" data-password-toggle="loginPassword" aria-label="Show password" title="Show password">👁️</button>
+      </div>
+      <button class="primary-button" type="submit">Sign in</button>
+    </form>
+    <p class="auth-switch">Student or employee? <a href="{{ url_for('register') }}">Create an account</a></p>
+  </main>
+</body>
+</html>

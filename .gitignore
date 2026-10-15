@@ -1,0 +1,16 @@
+# Private biometric and account data must not be pushed to source control.
+/faces/
+/model/
+/project_users.sqlite3
+/project_users.sqlite3-*
+/people_metadata.json
+/recognition_history.csv
+/history_export.csv
+/.env
+/__pycache__/
+/.venv/
+/venv/
+/.pytest_cache/
+*.log
+/ALL_CODE_REFERENCE.txt
+*.py[cod]
