@@ -35,12 +35,8 @@ The Admin creates Operator accounts from **User accounts**. Students and employe
 The attendance action is available only for a face recognized in the prior two minutes in that session. Attendance status is an in-dashboard update, not an SMS or email. Access control and visitor pass decisions are software simulations for demonstration; they do not open a door or control a physical lock. Face recognition can make mistakes, so this is not suitable as a real security system. Keep face images and the local database private.
 
 
-## Free hosting for mobile data
+## Mobile access
 
-The project includes a free Render Blueprint in `render.yaml`. The service listens on Render's assigned port, uses HTTPS for phone camera access, and keeps session cookies secure. To publish it, connect the private GitHub repository to Render and create a Blueprint from this repository. The deployment starts with an empty data directory and a one-time Admin setup; local accounts, face images, trained models, and history are not uploaded.
-
-This free setup has temporary storage. Render can stop a free web service after 15 minutes without incoming traffic, and its local filesystem is not persistent. Face samples, trained models, user accounts, and records can be lost after the service restarts or redeploys. Re-enroll and retrain only after participants agree to use the hosted demo, and do not use it for records that must be retained. The first visit after inactivity may take time while the service starts. Render's free services can be used for testing and demos, not production systems.
-
-After the first successful deployment, open the HTTPS `onrender.com` address shown by Render on a phone using mobile data. Camera access requires that HTTPS address; the local `127.0.0.1` address only works on the computer running the server. Keep face data private and use the site's deletion controls when the demo is finished.
+The application can be opened from a phone over mobile data after it is deployed to a Python web host that provides a public HTTPS address. Browser camera access requires HTTPS. The local `127.0.0.1` address only works on the computer running the server. Before choosing a host, confirm how it stores uploaded face samples, trained models, user accounts, and attendance records. Temporary hosting can lose this data after a restart or redeploy. Do not upload participant face data without their permission.
 
 This application is a prototype, not production-grade physical access control. Do not use its recognition decision as the only protection for a real entrance.
